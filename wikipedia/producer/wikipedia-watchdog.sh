@@ -1,12 +1,17 @@
 #!/usr/bin/env sh
 
 KAFKADIR=/1/crawling/kafka-0.8.0-beta1-src/
-KAFKASERVER=kafka.us.archive.org
 
 while [ 1 ]; do
 
 #irc consumer
-$KAFKADIR/bin/kafka-console-consumer.sh --zookeeper $KAFKASERVER:2181 --topic wiki-irc --group wiki-irc-watchdog-consumer --consumer-timeout-ms 180000 > /dev/null
+$KAFKADIR/bin/kafka-console-consumer.sh --zookeeper crawl-zk1.us.archive.org:2181 --topic wiki-irc --group wiki-irc-watchdog-consumer --consumer-timeout-ms 180000 > /dev/null
+
+kafkastatus=$?
+if [ $kafkastatus -ne 0 ]; then
+	echo "Unable to connect to kafka server: crawl-zk1.us.archive.org:2181 - $kafkastatus"
+        exit 1
+fi
 
 echo "No IRC message received for 3 minutes - restarting monitor"
 pkill -f monitor &> /dev/null
